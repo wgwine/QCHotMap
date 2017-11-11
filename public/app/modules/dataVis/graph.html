@@ -1,0 +1,33 @@
+﻿<div ng-controller="dataVisGraphCtrl" id="framer">
+
+    <div id="map" ></div>
+    <div class="controls">
+        <div class="control-group">
+            <h6>Traffic Incidents</h6>
+            <input type="checkbox" ng-model="accidentsToggle" ng-change="toggleLayer('accidents')" id="accidents" />
+        </div>
+        <div class="control-group">
+            <h6>Traffic Signals</h6>
+            <input type="checkbox" ng-model="signalsToggle" ng-change="toggleLayer('signals')" id="signals" />
+        </div>
+        <div class="control-group">
+            <h6>311 Data</h6>
+            <input type="checkbox" ng-model="data311Toggle" ng-change="toggleLayer('data311')" id="data311" />
+        </div>
+        <div class="extra-data" ng-if="data311Toggle">
+            <div class="data-point" ng-repeat="point in data311Top20"> <div class="color-icon" 
+            ng-style="{'background-color':data311ColorScale(point.key)}"></div> <div class="point-key">{{point.key}}</div><div class="point-value">{{point.value}}</div></div>
+        <div style="clear:both"></div>
+        </div>
+        <div class="control-group">
+            <h6>Felony Arrests</h6>
+            <input type="checkbox" ng-model="arrestsToggle" ng-change="toggleLayer('arrests')" id="arrests" />
+        </div>
+        <div class="control-group">
+            <h6>Sex Offenders</h6>
+            <input type="checkbox" ng-model="predatorsToggle" ng-change="toggleLayer('predators')" id="predators" />
+        </div>
+
+
+    </div>
+</div>

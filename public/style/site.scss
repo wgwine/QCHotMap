@@ -1,0 +1,100 @@
+
+html, body {
+	margin: 0;
+	padding: 0;
+	background: #fff;
+    font-family:Arial, Helvetica, sans-serif;
+}
+li {
+	list-style: none;
+}
+.pointer{
+	cursor:pointer;
+}
+.tooltip {
+  position: absolute;
+  line-height: .7;
+  font-weight: bold;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-weight: bold;
+  font: 11.5px sans-serif;
+  border-radius: 2px;
+  pointer-events: none;    
+}
+
+
+canvas,#map {
+    width: calc(100vw - 150px); 
+    height: calc(100vh - 5px);
+    float:left;
+    
+}
+.hider{
+    overflow:hidden;
+    width: calc(100vw - 150px); 
+    height: calc(100vh - 5px);
+    float:left;
+}
+.controls{
+    width:150px;
+    z-index:100;
+    height: calc(100vh - 5px); 
+    position:absolute;
+    right:0;
+    border-left:1px #ddd solid;
+    color:#fff;
+    font-size:12px;
+    background:#222;
+    .control-group{
+    padding: 5px 6px;
+    display: block;
+        h6{
+            display: inline;
+            font-size: 12px; 
+        }
+        input{
+            float:right;
+        }
+    }
+}
+.extra-data{
+    font-size:10px;
+    color:#fff;
+    padding:2px;
+    .data-point{
+        clear:both;
+        text-transform: capitalize;
+        .color-icon{
+            width:15px;
+            height:15px;
+            float:left;
+        }
+        .point-key{
+            float: left;
+            width: 104px;
+            padding-left: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-transform: capitalize;
+        }
+        .point-value{
+            float:right;
+        }
+    }
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+::placeholder {
+	color: #ccc!important;
+}
+
+.text-center {
+	text-align: center;
+}
