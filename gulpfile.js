@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var uglify = require('gulp-uglify');
+let uglify = require('gulp-uglify-es').default;
 var uglifycss = require('gulp-uglifycss');
 var concat = require('gulp-concat');
 var gulpif = require('gulp-if');

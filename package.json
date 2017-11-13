@@ -36,6 +36,7 @@
     "pump": "^1.0.2"
   },
   "devDependencies": {
-    "concurrently": "^3.5.0"
+    "concurrently": "^3.5.0",
+    "gulp-uglify-es": "^0.1.4"
   }
 }
