@@ -138,22 +138,22 @@ angular.module('App.dataVis')
                         incidentCount.push({ key: key, value: dataIncidents[key] });
                 }
                 //console.log(JSON.stringify(incidentCount));
-                //var ordered = _.orderBy(records, ['CRSH_LEVL'], ['desc']);
-                records.map(e => {
+                var ordered = _.orderBy(records, ['CRSH_LEVL'], ['desc']);
+                ordered.map(e => {
                     if (e.CRSH_LEVL != 'NA') {
                         var item = $scope.crashMap[e.Latitude + "" + e.Longitude + ":" + e.CRSH_LEVL];
                         if (item) {
-                            if (item.size <= 10) {
-                                item.size += .5;
-                            } else {
-                                item.opacity += .01;
-                            }
+
+                                item.size += 2;
+ 
+                                item.opacity += .005;
+                            
                         } else {
                             var coord = {
                                 id: $scope.makeid(),
-                                opacity: .6 / (e.CRSH_LEVL),
+                                opacity: .1/ (e.CRSH_LEVL),
                                 color: crashColorScale((e.CRSH_LEVL)),
-                                size: 2 / e.CRSH_LEVL,
+                                size: 1,
                                 date: new Date(e.DATE_VAL),
                                 latLng: new google.maps.LatLng(
                                     e.Latitude,
@@ -238,7 +238,7 @@ angular.module('App.dataVis')
                 var google = window.google;
                 function GMOverlay(map) {
                     this.map = map;
-
+                    $scope.i = 0;
                     this.onPan = this.onPan.bind(this);
                     this.setMap(map);
                     d3.queue()
@@ -253,74 +253,86 @@ angular.module('App.dataVis')
                 GMOverlay.prototype = new google.maps.OverlayView();
 
                 GMOverlay.prototype.drawtimeseries = function (that) {
-                    if($scope.coords.length<3)
-                    {
-                        clearInterval(this.seriesInterval);
-                        return;
+                    for (var a = 0; a < 40; a++) {
+                        var proj = that.getProjection();
+                        var sizem = sizeScale(Math.pow(2, $scope.map.getZoom()));
+                        let sz = 0;
+
+                        var e = $scope.coords[$scope.i];
+                        while (e && !(e.latLng.lat() >= $scope.bounds.f.b &&
+                            e.latLng.lat() <= $scope.bounds.f.f &&
+                            e.latLng.lng() >= $scope.bounds.b.b &&
+                            e.latLng.lng() <= $scope.bounds.b.f)) {
+                            $scope.i++;
+                            e = $scope.coords[$scope.i];
+                        }
+                        if (e !== undefined) {
+
+
+
+                            try {
+                                sz = (e.size * sizem);
+                            } catch (r) {
+                                console.log(JSON.stringify(e));
+                            }
+                            var context = that.offscreenContext;
+                            context.globalAlpha = e.opacity;
+                            context.fillStyle = e.color;
+                            var x = proj.fromLatLngToContainerPixel(e.latLng).x;
+                            var y = proj.fromLatLngToContainerPixel(e.latLng).y;
+
+                            context.beginPath();
+                            context.moveTo(x + sz, y);
+                            context.arc(x, y, sz, 0, sz * Math.PI);
+                            context.closePath();
+                            // var gradient = context.createRadialGradient(x, y, 0, x, y, sz);
+                            // gradient.addColorStop(0, e.color);
+                            // gradient.addColorStop(1, 'transparent');
+                            // context.fillStyle = gradient;
+                            context.fill();
+                            if (e.stroke)
+                                that.offscreenContext.stroke();
+
+                        }
+                        $scope.i++;
+                        if ($scope.i >= $scope.coords.length) {
+                            $scope.i = 0;
+                            $scope.overlay.offscreenContext.clearRect(0, 0, $('#map').width(), $('#map').height());
+                            $scope.overlay.context.clearRect(0, 0, $('#map').width(), $('#map').height());
+                        }
                     }
-                    var proj = that.getProjection();
-                    var sizem = sizeScale(Math.pow(2, $scope.map.getZoom()));
-                    let sz = 0;
-                    var e = $scope.coords.shift();
-
-                    while (e && !(e.latLng.lat() >= $scope.bounds.f.b &&
-                        e.latLng.lat() <= $scope.bounds.f.f &&
-                        e.latLng.lng() >= $scope.bounds.b.b &&
-                        e.latLng.lng() <= $scope.bounds.b.f)) {
-                        e = $scope.coords.shift();
-                    }
-
-                    sz = (e.size * sizem);
-                    var context = that.offscreenContext;
-                    context.globalAlpha = e.opacity;
-                    context.fillStyle = e.color;
-                    var x = proj.fromLatLngToContainerPixel(e.latLng).x;
-                    var y = proj.fromLatLngToContainerPixel(e.latLng).y;
-
-                    context.beginPath();
-                    context.moveTo(x + sz, y);
-                    context.arc(x, y, sz, 0, sz * Math.PI);
-                    context.closePath();
-                    // var gradient = context.createRadialGradient(x, y, 0, x, y, sz);
-                    // gradient.addColorStop(0, e.color);
-                    // gradient.addColorStop(1, 'transparent');
-                    // context.fillStyle = gradient;
-                    context.fill();
-                    if (e.stroke)
-                        that.offscreenContext.stroke();
-
                 }
                 GMOverlay.prototype.repaint = _.debounce(function () {
                     var that = this;
-                    this.seriesInterval = setInterval(function() { $scope.overlay.drawtimeseries(that); }, 1);
-                    // var proj = this.getProjection();
-                    // var sizem = sizeScale(Math.pow(2, $scope.map.getZoom()));
-                    // let sz = 0;
-                    // $scope.coords.filter(e => {
-                    //     return e.latLng.lat() >= $scope.bounds.f.b &&
-                    //         e.latLng.lat() <= $scope.bounds.f.f &&
-                    //         e.latLng.lng() >= $scope.bounds.b.b &&
-                    //         e.latLng.lng() <= $scope.bounds.b.f
-                    // }).map(e => {
-                    //     sz = (e.size * sizem);
-                    //     var context = that.offscreenContext;
-                    //     context.globalAlpha = e.opacity;
-                    //     context.fillStyle = e.color;
-                    //     var x = proj.fromLatLngToContainerPixel(e.latLng).x;
-                    //     var y = proj.fromLatLngToContainerPixel(e.latLng).y;
+                    var proj = this.getProjection();
+                    var sizem = sizeScale(Math.pow(2, $scope.map.getZoom()));
+                    let sz = 0;
+                    $scope.coords.filter(e => {
+                        return e.latLng.lat() >= $scope.bounds.f.b &&
+                            e.latLng.lat() <= $scope.bounds.f.f &&
+                            e.latLng.lng() >= $scope.bounds.b.b &&
+                            e.latLng.lng() <= $scope.bounds.b.f
+                    }).map(e => {
+                        sz = (e.size * sizem);
+                        var context = that.offscreenContext;
+                        context.globalAlpha = e.opacity;
+                        context.fillStyle = e.color;
+                        var x = proj.fromLatLngToContainerPixel(e.latLng).x;
+                        var y = proj.fromLatLngToContainerPixel(e.latLng).y;
 
-                    //     context.beginPath();
-                    //     context.moveTo(x + sz, y);
-                    //     context.arc(x, y, sz, 0, sz * Math.PI);
-                    //     context.closePath();
-                    //     // var gradient = context.createRadialGradient(x, y, 0, x, y, sz);
-                    //     // gradient.addColorStop(0, e.color);
-                    //     // gradient.addColorStop(1, 'transparent');
-                    //     // context.fillStyle = gradient;
-                    //     context.fill();
-                    //     if (e.stroke)
-                    //         that.offscreenContext.stroke();
-                    // });
+                        context.beginPath();
+                        context.moveTo(x + sz, y);
+                        context.arc(x, y, sz, 0, sz * Math.PI);
+                        context.closePath();
+                        var gradient = context.createRadialGradient(x, y, 0, x, y, sz);
+                        gradient.addColorStop(0, e.color);
+                        gradient.addColorStop(.25, e.color);
+                        gradient.addColorStop(1, 'transparent');
+                        context.fillStyle = gradient;
+                        context.fill();
+                        if (e.stroke)
+                            that.offscreenContext.stroke();
+                    });
                 }, 200);
 
                 GMOverlay.prototype.onDataLoaded = function () {
@@ -381,7 +393,7 @@ angular.module('App.dataVis')
 
                 $scope.map = new google.maps.Map(el, {
                     center: new google.maps.LatLng(35.2253679, -80.8398772),
-                    zoom: 14,
+                    zoom: 13,
                     disableDefaultUI: true,
                     backgroundColor: '#002732',
                 });
